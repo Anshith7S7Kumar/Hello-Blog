@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./styles.css">
+    <title>Login</title>
+</head>
+<body>
+
+    <nav class="Nav-bar">
+        <ul class="Nav-links">
+            <li><a href="/">Home</a></li>
+        </ul>
+       </nav>
+
+    <form action="/register" method="post">
+        <label for="email">Email</label>
+        <input type="email" name="email">
+
+        <label for="password">Password</label>
+        <input type="password" name="password">
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <div class="col-sm-4">
+        <div class="card social-block">
+          <div class="card-body">
+            <a class="btn btn-block" href="/auth/google" role="button">
+              <i class="fab fa-google"></i>
+              Sign Up with Google!
+            </a>
+          </div>
+        </div>
+      </div>
+  
+    
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./styles.css">
+    <title>Edit your Blog!</title>
+</head>
+<body>
+    <nav class="Nav-bar">
+        <ul class="Nav-links">
+            <li><a href="/">Home</a></li>
+        </ul>
+       </nav>
+    <% for(let posts of Post) { %>
+        <div class="card"> 
+            <h3><%= posts.title %></h3>
+            <p><%= posts.content  %></p>
+            <form action="/delete" method="post">
+                <input type="hidden" name="Title" value="<%= posts.title %>">
+                <button type="submit">Delete</button>
+            </form>
+            <br>
+            <a href="/edit/<%= encodeURIComponent(posts.title) %>">
+                <button>Edit</button>
+            </a>
+        </div>
+        <% } %>
+</body>
+</html>
