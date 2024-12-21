@@ -11,7 +11,6 @@
     const app = express(); 
     const PORT = 3000; 
     const saltRounds = 10; 
-
     dotenv.config();
 
 
