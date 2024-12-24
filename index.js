@@ -42,13 +42,13 @@ let db = null;
 const getDB = async () => {
     if (!db) {
         db = new pg.Client({
-            user: process.env.USER,
-            host: process.env.HOST,
-            database: process.env.DATA_BASE,
-            password: process.env.PASSWORD,
-            port: process.env.DB_PORT, // Changed from PORT to avoid conflict
+            user: process.env.PGUSER,
+            host: process.env.PGHOST,
+            database: process.env.PGDATABASE,
+            password: process.env.PGPASSWORD,
+            port: process.env.PGPORT,
             ssl: {
-                rejectUnauthorized: false
+                rejectUnauthorized: true 
             }
         });
         await db.connect();
