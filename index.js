@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3000;
 const saltRounds = 10;
 dotenv.config();
 
-// Error handling for uncaught exceptions
+
 process.on('uncaughtException', (err) => {
     console.error('Uncaught Exception:', err);
 });
@@ -22,7 +22,6 @@ process.on('unhandledRejection', (err) => {
     console.error('Unhandled Rejection:', err);
 });
 
-// Session configuration
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -30,28 +29,38 @@ app.use(session({
     cookie: {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        maxAge: 24 * 60 * 60 * 1000 
     }
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Database connection handling
+
 let db = null;
 const getDB = async () => {
     if (!db) {
-        db = new pg.Client({
+        const isProduction = process.env.NODE_ENV === 'production';
+        
+        const dbConfig = {
             user: process.env.PGUSER,
             host: process.env.PGHOST,
             database: process.env.PGDATABASE,
             password: process.env.PGPASSWORD,
             port: process.env.PGPORT,
-            ssl: {
-                rejectUnauthorized: true 
-            }
-        });
+        };
+
+        if (isProduction) {
+            dbConfig.ssl = {
+                rejectUnauthorized: true
+            };
+        }
+
+        db = new pg.Client(dbConfig);
         await db.connect();
+
+        const result = await db.query('SELECT current_user, current_database()');
+        console.log('Connected as:', result.rows[0]);
     }
     return db;
 };
@@ -63,12 +72,15 @@ app.use(express.static('public'));
 app.get("/", async (req, res) => {
     try {
         const client = await getDB();
-        const query = await client.query("SELECT * FROM posts");
+        console.log("Database connected");
+        // Use double quotes for case sensitivity
+        const query = await client.query('SELECT * FROM "public"."posts"');
+        console.log("Query executed", query.rows);
         res.render("hello.ejs", {
             Posts: query.rows,
         });
     } catch (err) {
-        console.log("Error fetching data:", err);
+        console.error("Detailed error:", err);
         res.status(500).send("Error fetching posts");
     }
 });
