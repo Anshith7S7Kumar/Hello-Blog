@@ -42,7 +42,12 @@ const getDB = async () => {
     if (!db) {
         const isProduction = process.env.NODE_ENV === 'production';
         
-        const dbConfig = {
+        const dbConfig = isProduction ? {
+            connectionString: process.env.DATABASE_URL,
+            ssl: {
+                rejectUnauthorized: true
+            }
+        } : {
             user: process.env.PGUSER,
             host: process.env.PGHOST,
             database: process.env.PGDATABASE,
