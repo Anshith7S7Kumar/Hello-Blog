@@ -40,32 +40,33 @@ app.use(passport.session());
 let db = null;
 const getDB = async () => {
     if (!db) {
-        const isProduction = process.env.NODE_ENV === 'production';
-        
-        const dbConfig = isProduction ? {
-            connectionString: process.env.DATABASE_URL,
-            ssl: {
-                rejectUnauthorized: true
-            }
-        } : {
-            user: process.env.PGUSER,
-            host: process.env.PGHOST,
-            database: process.env.PGDATABASE,
-            password: process.env.PGPASSWORD,
-            port: process.env.PGPORT,
-        };
-
-        if (isProduction) {
-            dbConfig.ssl = {
-                rejectUnauthorized: true
+        try {
+            const isProduction = process.env.NODE_ENV === 'production';
+            
+            const dbConfig = isProduction ? {
+                connectionString: process.env.DATABASE_URL,
+                ssl: {
+                    rejectUnauthorized: true
+                }
+            } : {
+                user: process.env.PGUSER,
+                host: process.env.PGHOST,
+                database: process.env.PGDATABASE,
+                password: process.env.PGPASSWORD,
+                port: process.env.PGPORT,
             };
+
+            db = new pg.Client(dbConfig);
+            await db.connect();
+            console.log('Environment:', process.env.NODE_ENV);
+            console.log('Database Config:', isProduction ? 'Using production config' : 'Using development config');
+            
+            const result = await db.query('SELECT current_user, current_database()');
+            console.log('Connected as:', result.rows[0]);
+        } catch (error) {
+            console.error('Database connection error:', error);
+            throw error;
         }
-
-        db = new pg.Client(dbConfig);
-        await db.connect();
-
-        const result = await db.query('SELECT current_user, current_database()');
-        console.log('Connected as:', result.rows[0]);
     }
     return db;
 };
@@ -76,17 +77,20 @@ app.use(express.static('public'));
 // Routes
 app.get("/", async (req, res) => {
     try {
+        console.log("Attempting to connect to database...");
         const client = await getDB();
-        console.log("Database connected");
-        // Use double quotes for case sensitivity
-        const query = await client.query('SELECT * FROM "public"."posts"');
-        console.log("Query executed", query.rows);
+        console.log("Database connected successfully");
+        
+        console.log("Attempting to query posts...");
+        const query = await client.query('SELECT * FROM posts');
+        console.log("Query successful, found", query.rows.length, "posts");
+        
         res.render("hello.ejs", {
             Posts: query.rows,
         });
     } catch (err) {
-        console.error("Detailed error:", err);
-        res.status(500).send("Error fetching posts");
+        console.error("Detailed error in root route:", err);
+        res.status(500).send("Error fetching posts: " + err.message);
     }
 });
 
