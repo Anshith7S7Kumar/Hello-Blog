@@ -119,7 +119,7 @@ app.get("/auth/google", passport.authenticate("google", {
     scope: ["profile", "email"]
 }));
 
-app.get("/auth/google/write_edit",
+app.get("/auth/google/callback",
     passport.authenticate("google", { failureRedirect: "/login" }),
     (req, res) => {
         res.redirect("/write_edit");
@@ -286,7 +286,9 @@ passport.use(
     new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: process.env.GOOGLE_CALLBACK_URL || "http://localhost:3000/auth/google/write_edit",
+        callbackURL: process.env.NODE_ENV === 'production' 
+            ? "https://hello-blog-production.up.railway.app"  // Replace with your actual production URL
+            : "http://localhost:3000/auth/google/callback",
         userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
     },
     async (accessToken, refreshToken, profile, cb) => {
